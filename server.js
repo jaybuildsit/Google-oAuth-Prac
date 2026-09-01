@@ -18,10 +18,21 @@ app.use(passport.initialize());
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.GOOGLE_CALLBACK_URI
+    callbackURL: "/auth/google/callback",
 
 
+},(_,__,profile,done) => {
+    return done(null, profile);
 }));
+
+app.get("/auth/google",(req,res)=>{
+    passport.authenticate("google", {scope: ["profile", "email"]});
+})
+
+app.get("/auth/google/callback", passport.authenticate("google", {failureRedirect: "/login"}), (req,res) => {
+    console.log(req.user);
+    res.send("Successfully authenticated with Google!");
+});
 
 app.listen(3000, () => {
     console.log("Server is running on http://localhost:3000");
