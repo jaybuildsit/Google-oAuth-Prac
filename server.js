@@ -1,12 +1,15 @@
 import { config } from "dotenv";
 import express from "express";
 import passport from "passport";
+import morgan from "morgan";
 
 import {Strategy as GoogleStrategy } from "passport-google-oauth20"
 
 config();
 
 const app = express()
+
+app.use(morgan("dev"));
 
 
 app.get("/", (req, res) => {
@@ -25,11 +28,11 @@ passport.use(new GoogleStrategy({
     return done(null, profile);
 }));
 
-app.get("/auth/google",(req,res)=>{
-    passport.authenticate("google", {scope: ["profile", "email"]});
-})
+app.get("/auth/google",
+    passport.authenticate("google", {scope: ["profile", "email"]})
+)
 
-app.get("/auth/google/callback", passport.authenticate("google", {failureRedirect: "/login"}), (req,res) => {
+app.get("/auth/google/callback", passport.authenticate("google",{session:false,failureRedirect: "/login"}), (req,res) => {
     console.log(req.user);
     res.send("Successfully authenticated with Google!");
 });
